@@ -103,3 +103,82 @@ SystemC
               }
 
       } // Everything between open and close braces become a real systemC module 
+
+----------------------- DAY 2 --------------------------------
+
+-> SC_METHODs
+        1. Limited to one cycle
+        2. Fine for counters or simple sequential designs
+        3. Not much different than hand coded RTL
+        4. Can't handle multicycle algorithms
+
+-> SC_CTHREADs
+        1. Not limited to one cycle
+        2. Can contain continuous loops
+        3. Can contain large blocks of code with operations or control
+        4. Great for behavioral synthesis
+
+        ----------------CODE-----------
+                 _______________________________________
+        inp --->|                                       |
+                |                                       |
+        clk --->|                                       |
+                |                                       |---> outp
+                |           fir                         |
+        rst --->|                                       |      
+                |_______________________________________|
+
+                #include <systemc.h>
+                SC_MODULE (fir) {
+                        sc_in <bool> clk ;
+                        sc_in <bool> rst ;
+                        sc_in < sc_int<16> > inp ;
+                        sc_out < sc_int<16> > outp ;
+
+                        void fir_main() ;
+
+                        SC_CTOR ( fir ) {
+                                SC_CTHREAD (fir_main, clk.pos()) ;
+                                reset_signal_is (rst, true) ; // true means reset is asserted high while false means reset in asserted low
+                        }
+                }
+
+                // Coefficients for each fir
+                const sc_uint<8> coef[5] = {
+                        18,
+                        77,
+                        107,
+                        87,
+                        18
+                };
+
+
+                // FIR Main thread
+                void fir::fir_main ( void ) {
+
+                        sc_int<16> taps[5];
+
+                        // Reset code
+                        // Reset internal variables
+                        outp.write(0) ;
+                        wait() ;
+
+                        while ( true ) {
+                                // Read inputs
+                                // algorithm code
+                                // write outputs
+
+                                for (int i = 5 - 1 ; i > 0 ; i--) {
+                                        taps[i] = taps[i - 1] ;
+                                }
+                                taps[0] = inp.read() ;
+
+                                sc_int<16> val ;
+                                for (int i 0 ; i < 5 ; i++) 
+                                {
+                                        val += coef[i] * taps[i] ;
+                                }
+                                outp.write(val);
+                                wait();
+                        }
+                }
