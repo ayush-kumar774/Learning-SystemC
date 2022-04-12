@@ -1,5 +1,6 @@
 #include "systemc.h"
 
+// FIR filter module
 SC_MODULE (fir) {
         sc_in <bool> clk;
         sc_in <bool> rst;
